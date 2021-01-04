@@ -19,13 +19,17 @@ const theme = createMuiTheme({
     },
   },
   typography: {
-    fontSize: 16,
+    fontSize: 14,
   },
   overrides: {
     MuiCssBaseline: {
       '@global': {
         html: {
           WebkitFontSmoothing: 'antialiased',
+        },
+        '#root': {
+          height: '100vh',
+          display: 'flex',
         },
       },
     },
