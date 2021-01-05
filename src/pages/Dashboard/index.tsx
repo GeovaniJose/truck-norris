@@ -1,8 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
   Box,
+  Card,
+  CardContent,
   Checkbox,
+  CircularProgress,
   Container,
   FormControl,
   FormControlLabel,
@@ -16,7 +19,10 @@ import {
   FilterListRounded,
   ClearRounded,
   DoneRounded,
+  Star,
 } from '@material-ui/icons';
+
+import api from '../../services/api';
 
 interface CheckboxOptionsData {
   nerdy: boolean;
@@ -26,6 +32,20 @@ interface CheckboxOptionsData {
 interface TextFieldsValueData {
   firstName: string;
   lastName: string;
+}
+
+interface ApiGetParams {
+  firstName?: string;
+  lastName?: string;
+  limitTo?: string;
+  escape?: string;
+}
+
+interface JokeItem {
+  id: number;
+  joke: string;
+  categories: string[];
+  favorite: boolean;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -82,6 +102,7 @@ const useStyles = makeStyles((theme: Theme) =>
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-end',
+      alignItems: 'center',
       padding: theme.spacing(1),
       borderBottomRightRadius: 20,
       background: theme.palette.primary.main,
@@ -98,6 +119,53 @@ const useStyles = makeStyles((theme: Theme) =>
       fontSize: 30,
       color: theme.palette.error.main,
     },
+    progressBar: {
+      color: theme.palette.success.main,
+      marginTop: 15,
+      marginBottom: 15,
+    },
+    jokesContainer: {
+      padding: theme.spacing(4, 0),
+    },
+    jokesGridTitle: {
+      color: theme.palette.secondary.dark,
+    },
+    jokesGrid: {
+      listStyle: 'none',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+      gridGap: theme.spacing(3),
+      margin: theme.spacing(4, 0),
+      padding: 0,
+    },
+    jokesCard: {
+      position: 'relative',
+      height: '100%',
+      display: 'flex',
+      background: theme.palette.secondary.dark,
+      color: theme.palette.primary.dark,
+    },
+    jokesCardContent: {
+      textAlign: 'justify',
+      padding: theme.spacing(3),
+    },
+    jokesCardIcon: {
+      position: 'absolute',
+      width: 30,
+      top: 0,
+      right: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderBottomLeftRadius: 15,
+      background: theme.palette.primary.main,
+    },
+    iconStarBorder: {
+      color: theme.palette.secondary.dark,
+    },
+    iconStarFilled: {
+      color: theme.palette.warning.main,
+    },
   }),
 );
 
@@ -105,6 +173,7 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
 
   const [showFilter, setShowFilter] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [checkboxOptions, setCheckboxOptions] = useState<CheckboxOptionsData>({
     nerdy: false,
     explicit: false,
@@ -113,6 +182,24 @@ const Dashboard: React.FC = () => {
     firstName: '',
     lastName: '',
   });
+  const [jokes, setJokes] = useState<JokeItem[]>([]);
+
+  useEffect(() => {
+    api
+      .get('/jokes', {
+        params: {
+          escape: 'javascript',
+        },
+      })
+      .then(response => {
+        setJokes(
+          response.data.value.map((data: JokeItem) => ({
+            ...data,
+            favorite: false,
+          })),
+        );
+      });
+  }, []);
 
   const handleShowFilter = useCallback(() => {
     setShowFilter(!showFilter);
@@ -138,10 +225,58 @@ const Dashboard: React.FC = () => {
     [textFieldsValue],
   );
 
-  const handleFilterDone = useCallback(() => {
-    console.log(checkboxOptions);
-    console.log(textFieldsValue);
+  const handleFilterDone = useCallback(async () => {
+    setIsLoading(true);
+    const { firstName, lastName } = textFieldsValue;
+    const { nerdy, explicit } = checkboxOptions;
+
+    const params: ApiGetParams = {
+      ...(firstName
+        ? {
+            firstName,
+          }
+        : {}),
+      ...(lastName
+        ? {
+            lastName,
+          }
+        : {}),
+      ...(nerdy || explicit
+        ? {
+            limitTo: `[${nerdy ? 'nerdy' : ''},${explicit ? 'explicit' : ''}]`,
+          }
+        : {}),
+      escape: 'javascript',
+    };
+
+    api
+      .get('/jokes', {
+        params,
+      })
+      .then(response =>
+        setJokes(
+          response.data.value.map((data: JokeItem) => ({
+            ...data,
+            favorite: false,
+          })),
+        ),
+      )
+      .finally(() => {
+        setIsLoading(false);
+        setShowFilter(false);
+      });
   }, [checkboxOptions, textFieldsValue]);
+
+  const handleJokeFavorite = useCallback(
+    (id: number) => {
+      const formattedJokes = jokes.map(joke =>
+        joke.id === id ? { ...joke, favorite: !joke.favorite } : joke,
+      );
+
+      setJokes(formattedJokes);
+    },
+    [jokes],
+  );
 
   return (
     <Container className={classes.root}>
@@ -220,21 +355,69 @@ const Dashboard: React.FC = () => {
               >
                 <ClearRounded fontSize="inherit" />
               </IconButton>
-              <IconButton
-                className={classes.iconCheck}
-                component="span"
-                onClick={handleFilterDone}
-                title="Done"
-              >
-                <DoneRounded fontSize="inherit" />
-              </IconButton>
+              {!isLoading ? (
+                <IconButton
+                  className={classes.iconCheck}
+                  component="span"
+                  onClick={handleFilterDone}
+                  title="Done"
+                >
+                  <DoneRounded fontSize="inherit" />
+                </IconButton>
+              ) : (
+                <CircularProgress
+                  className={classes.progressBar}
+                  size={24}
+                  color="secondary"
+                />
+              )}
             </>
           )}
         </Box>
       </Box>
-      <Typography variant="h1" component="h1">
-        Dashboard
-      </Typography>
+
+      <Box className={classes.jokesContainer}>
+        <Typography
+          component="h1"
+          variant="h4"
+          className={classes.jokesGridTitle}
+        >
+          Jokes
+        </Typography>
+        <ul className={classes.jokesGrid}>
+          {jokes.map(joke => (
+            <li key={joke.id}>
+              <Card elevation={3} className={classes.jokesCard}>
+                <CardContent className={classes.jokesCardContent}>
+                  <Typography component="strong" variant="h6">
+                    {joke.joke}
+                  </Typography>
+                </CardContent>
+                <section className={classes.jokesCardIcon}>
+                  <IconButton
+                    component="span"
+                    size="small"
+                    onClick={() => handleJokeFavorite(joke.id)}
+                    title="Favorite"
+                  >
+                    {joke.favorite ? (
+                      <Star
+                        className={classes.iconStarFilled}
+                        fontSize="default"
+                      />
+                    ) : (
+                      <Star
+                        className={classes.iconStarBorder}
+                        fontSize="default"
+                      />
+                    )}
+                  </IconButton>
+                </section>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </Box>
     </Container>
   );
 };
