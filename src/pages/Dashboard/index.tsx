@@ -21,6 +21,7 @@ import {
   DoneRounded,
   Star,
 } from '@material-ui/icons';
+import { Skeleton } from '@material-ui/lab';
 
 import api from '../../services/api';
 
@@ -146,6 +147,7 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.primary.dark,
     },
     jokesCardContent: {
+      flex: 1,
       textAlign: 'justify',
       padding: theme.spacing(3),
     },
@@ -173,7 +175,7 @@ const Dashboard: React.FC = () => {
   const classes = useStyles();
 
   const [showFilter, setShowFilter] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [checkboxOptions, setCheckboxOptions] = useState<CheckboxOptionsData>({
     nerdy: false,
     explicit: false,
@@ -198,7 +200,8 @@ const Dashboard: React.FC = () => {
             favorite: false,
           })),
         );
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleShowFilter = useCallback(() => {
@@ -385,37 +388,52 @@ const Dashboard: React.FC = () => {
           Jokes
         </Typography>
         <ul className={classes.jokesGrid}>
-          {jokes.map(joke => (
-            <li key={joke.id}>
-              <Card elevation={3} className={classes.jokesCard}>
-                <CardContent className={classes.jokesCardContent}>
-                  <Typography component="strong" variant="h6">
-                    {joke.joke}
+          {!isLoading &&
+            jokes.map(joke => (
+              <li key={joke.id}>
+                <Card elevation={3} className={classes.jokesCard}>
+                  <CardContent className={classes.jokesCardContent}>
+                    <Typography component="strong" variant="h6">
+                      {joke.joke}
+                    </Typography>
+                  </CardContent>
+                  <section className={classes.jokesCardIcon}>
+                    <IconButton
+                      component="span"
+                      size="small"
+                      onClick={() => handleJokeFavorite(joke.id)}
+                      title="Favorite"
+                    >
+                      {joke.favorite ? (
+                        <Star
+                          className={classes.iconStarFilled}
+                          fontSize="default"
+                        />
+                      ) : (
+                        <Star
+                          className={classes.iconStarBorder}
+                          fontSize="default"
+                        />
+                      )}
+                    </IconButton>
+                  </section>
+                </Card>
+              </li>
+            ))}
+
+          {isLoading &&
+            [0, 1, 2, 3].map(numb => (
+              <Card elevation={3} key={numb}>
+                <CardContent>
+                  <Typography variant="h6">
+                    <Skeleton width="100%" animation="wave" />
+                    <Skeleton width="100%" animation="wave" />
+                    <Skeleton width="100%" animation="wave" />
+                    <Skeleton width="40%" animation="wave" />
                   </Typography>
                 </CardContent>
-                <section className={classes.jokesCardIcon}>
-                  <IconButton
-                    component="span"
-                    size="small"
-                    onClick={() => handleJokeFavorite(joke.id)}
-                    title="Favorite"
-                  >
-                    {joke.favorite ? (
-                      <Star
-                        className={classes.iconStarFilled}
-                        fontSize="default"
-                      />
-                    ) : (
-                      <Star
-                        className={classes.iconStarBorder}
-                        fontSize="default"
-                      />
-                    )}
-                  </IconButton>
-                </section>
               </Card>
-            </li>
-          ))}
+            ))}
         </ul>
       </Box>
     </Container>
