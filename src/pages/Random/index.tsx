@@ -33,6 +33,7 @@ interface CheckboxOptionsData {
 interface TextFieldsValueData {
   firstName: string;
   lastName: string;
+  quantity: string;
 }
 
 interface ApiGetParams {
@@ -171,7 +172,7 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const Dashboard: React.FC = () => {
+const Random: React.FC = () => {
   const classes = useStyles();
 
   const [showFilter, setShowFilter] = useState(false);
@@ -183,12 +184,15 @@ const Dashboard: React.FC = () => {
   const [textFieldsValue, setTextFieldsValue] = useState<TextFieldsValueData>({
     firstName: '',
     lastName: '',
+    quantity: '',
   });
   const [jokes, setJokes] = useState<JokeItem[]>([]);
 
   useEffect(() => {
+    setIsLoading(true);
+
     api
-      .get('/jokes', {
+      .get('/jokes/random/5', {
         params: {
           escape: 'javascript',
         },
@@ -230,7 +234,7 @@ const Dashboard: React.FC = () => {
 
   const handleFilterDone = useCallback(() => {
     setIsLoading(true);
-    const { firstName, lastName } = textFieldsValue;
+    const { firstName, lastName, quantity } = textFieldsValue;
     const { nerdy, explicit } = checkboxOptions;
 
     const params: ApiGetParams = {
@@ -252,8 +256,11 @@ const Dashboard: React.FC = () => {
       escape: 'javascript',
     };
 
+    const validQuantity =
+      parseInt(quantity, 10) > 1 ? parseInt(quantity, 10) : 5;
+
     api
-      .get('/jokes', {
+      .get(`/jokes/random/${validQuantity}`, {
         params,
       })
       .then(response =>
@@ -335,6 +342,19 @@ const Dashboard: React.FC = () => {
                 onChange={handleTextFieldChange}
               />
             </FormControl>
+
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">Randomized</FormLabel>
+              <TextField
+                name="quantity"
+                label="Quantity"
+                size="small"
+                variant="filled"
+                type="number"
+                value={textFieldsValue.quantity}
+                onChange={handleTextFieldChange}
+              />
+            </FormControl>
           </Container>
         )}
 
@@ -385,7 +405,7 @@ const Dashboard: React.FC = () => {
           variant="h4"
           className={classes.jokesGridTitle}
         >
-          Jokes
+          Random
         </Typography>
         <ul className={classes.jokesGrid}>
           {!isLoading &&
@@ -440,4 +460,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default Random;
