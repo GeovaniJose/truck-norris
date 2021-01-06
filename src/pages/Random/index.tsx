@@ -126,7 +126,7 @@ const useStyles = makeStyles((theme: Theme) =>
       marginTop: 15,
       marginBottom: 15,
     },
-    jokesContainer: {
+    mainContainer: {
       padding: theme.spacing(4, 0),
     },
     jokesGridTitle: {
@@ -152,7 +152,7 @@ const useStyles = makeStyles((theme: Theme) =>
       textAlign: 'justify',
       padding: theme.spacing(3),
     },
-    jokesCardIcon: {
+    jokesCardIcons: {
       position: 'absolute',
       width: 30,
       top: 0,
@@ -399,7 +399,7 @@ const Random: React.FC = () => {
         </Box>
       </Box>
 
-      <Box className={classes.jokesContainer}>
+      <Box className={classes.mainContainer}>
         <Typography
           component="h1"
           variant="h4"
@@ -417,7 +417,7 @@ const Random: React.FC = () => {
                       {joke.joke}
                     </Typography>
                   </CardContent>
-                  <section className={classes.jokesCardIcon}>
+                  <section className={classes.jokesCardIcons}>
                     <IconButton
                       component="span"
                       size="small"
@@ -443,16 +443,22 @@ const Random: React.FC = () => {
 
           {isLoading &&
             [0, 1, 2, 3].map(numb => (
-              <Card elevation={3} key={numb}>
-                <CardContent>
-                  <Typography variant="h6">
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="40%" animation="wave" />
-                  </Typography>
-                </CardContent>
-              </Card>
+              <li key={numb}>
+                <Card elevation={3} className={classes.jokesCard}>
+                  <CardContent className={classes.jokesCardContent}>
+                    <Typography variant="h6">
+                      <Skeleton width="100%" animation="wave" />
+                      <Skeleton width="100%" animation="wave" />
+                      <Skeleton width="40%" animation="wave" />
+                    </Typography>
+                  </CardContent>
+                  <section className={classes.jokesCardIcons}>
+                    <IconButton component="span" size="small">
+                      <Skeleton width={15} animation="wave" />
+                    </IconButton>
+                  </section>
+                </Card>
+              </li>
             ))}
         </ul>
       </Box>
