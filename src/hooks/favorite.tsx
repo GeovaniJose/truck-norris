@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
-interface Joke {
+interface JokeItem {
   id: number;
   joke: string;
   categories: string[];
@@ -8,7 +14,9 @@ interface Joke {
 }
 
 interface FavoriteContextData {
-  favorite: Joke[];
+  favoriteJokes: JokeItem[];
+  addFavoriteJoke(item: JokeItem): void;
+  removeFavoriteJoke(id: number): void;
 }
 
 const FavoriteContext = createContext<FavoriteContextData>(
@@ -16,9 +24,55 @@ const FavoriteContext = createContext<FavoriteContextData>(
 );
 
 export const FavoriteProvider: React.FC = ({ children }) => {
-  const [favorite, setFavorite] = useState<Joke[]>([]);
+  const [favoriteJokes, setFavoriteJokes] = useState<JokeItem[]>(() => {
+    const storagedFavoriteJokes = localStorage.getItem(
+      '@TruckNorris:favoriteJokes',
+    );
 
-  const value = useMemo(() => ({ favorite }), [favorite]);
+    if (storagedFavoriteJokes) {
+      return [...JSON.parse(storagedFavoriteJokes)];
+    }
+
+    return [];
+  });
+
+  const addFavoriteJoke = useCallback(
+    ({ id, joke, categories, favorite }: JokeItem) => {
+      const newJoke = {
+        id,
+        joke,
+        categories,
+        favorite,
+      };
+
+      const newFavoriteJokes = [...favoriteJokes, newJoke];
+
+      setFavoriteJokes(newFavoriteJokes);
+      localStorage.setItem(
+        '@TruckNorris:favoriteJokes',
+        JSON.stringify(newFavoriteJokes),
+      );
+    },
+    [favoriteJokes],
+  );
+
+  const removeFavoriteJoke = useCallback(
+    (id: number) => {
+      const newFavoriteJokes = favoriteJokes.filter(joke => joke.id !== id);
+
+      setFavoriteJokes(newFavoriteJokes);
+      localStorage.setItem(
+        '@TruckNorris:favoriteJokes',
+        JSON.stringify(newFavoriteJokes),
+      );
+    },
+    [favoriteJokes],
+  );
+
+  const value = useMemo(
+    () => ({ favoriteJokes, addFavoriteJoke, removeFavoriteJoke }),
+    [favoriteJokes, addFavoriteJoke, removeFavoriteJoke],
+  );
 
   return (
     <FavoriteContext.Provider value={value}>
