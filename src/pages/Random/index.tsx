@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
   Box,
@@ -23,6 +23,7 @@ import {
 } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 
+import { useFavorite } from '../../hooks/favorite';
 import api from '../../services/api';
 
 interface CheckboxOptionsData {
@@ -174,6 +175,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Random: React.FC = () => {
   const classes = useStyles();
+  const { favoriteJokes, addFavoriteJoke, removeFavoriteJoke } = useFavorite();
 
   const [showFilter, setShowFilter] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -277,15 +279,39 @@ const Random: React.FC = () => {
       });
   }, [checkboxOptions, textFieldsValue]);
 
-  const handleJokeFavorite = useCallback(
+  const handleToggleJokeFavorite = useCallback(
     (id: number) => {
-      const formattedJokes = jokes.map(joke =>
-        joke.id === id ? { ...joke, favorite: !joke.favorite } : joke,
-      );
+      const formattedJokes = jokes.map(joke => {
+        if (joke.id === id) {
+          const toggledFavoriteJoke = { ...joke, favorite: !joke.favorite };
+
+          if (toggledFavoriteJoke.favorite) {
+            addFavoriteJoke(toggledFavoriteJoke);
+          } else {
+            removeFavoriteJoke(id);
+          }
+
+          return toggledFavoriteJoke;
+        }
+
+        return joke;
+      });
 
       setJokes(formattedJokes);
     },
-    [jokes],
+    [jokes, addFavoriteJoke, removeFavoriteJoke],
+  );
+
+  const jokesWithFavoriteSetted: JokeItem[] = useMemo(
+    () =>
+      jokes.map((data: JokeItem) => {
+        if (favoriteJokes.some(joke => joke.joke === data.joke)) {
+          return { ...data, favorite: true };
+        }
+
+        return { ...data, favorite: false };
+      }),
+    [jokes, favoriteJokes],
   );
 
   return (
@@ -409,7 +435,7 @@ const Random: React.FC = () => {
         </Typography>
         <ul className={classes.jokesGrid}>
           {!isLoading &&
-            jokes.map(joke => (
+            jokesWithFavoriteSetted.map(joke => (
               <li key={joke.id}>
                 <Card elevation={3} className={classes.jokesCard}>
                   <CardContent className={classes.jokesCardContent}>
@@ -421,7 +447,7 @@ const Random: React.FC = () => {
                     <IconButton
                       component="span"
                       size="small"
-                      onClick={() => handleJokeFavorite(joke.id)}
+                      onClick={() => handleToggleJokeFavorite(joke.id)}
                       title="Favorite"
                     >
                       {joke.favorite ? (

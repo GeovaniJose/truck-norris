@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import { VariableSizeList as List } from 'react-window';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -25,6 +25,7 @@ import {
   Star,
 } from '@material-ui/icons';
 
+import { useFavorite } from '../../hooks/favorite';
 import api from '../../services/api';
 
 interface CheckboxOptionsData {
@@ -188,6 +189,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Dashboard: React.FC = () => {
   const classes = useStyles();
+  const { favoriteJokes, addFavoriteJoke, removeFavoriteJoke } = useFavorite();
 
   const [showFilter, setShowFilter] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -209,15 +211,10 @@ const Dashboard: React.FC = () => {
         },
       })
       .then(response => {
-        setJokes(
-          response.data.value.map((data: JokeItem) => ({
-            ...data,
-            favorite: false,
-          })),
-        );
+        setJokes(response.data.value);
       })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [favoriteJokes]);
 
   const handleShowFilter = useCallback(() => {
     setShowFilter(!showFilter);
@@ -271,34 +268,51 @@ const Dashboard: React.FC = () => {
       .get('/jokes', {
         params,
       })
-      .then(response =>
-        setJokes(
-          response.data.value.map((data: JokeItem) => ({
-            ...data,
-            favorite: false,
-          })),
-        ),
-      )
+      .then(response => setJokes(response.data.value))
       .finally(() => {
         setIsLoading(false);
         setShowFilter(false);
       });
   }, [checkboxOptions, textFieldsValue]);
 
-  const handleJokeFavorite = useCallback(
+  const handleToggleJokeFavorite = useCallback(
     (id: number) => {
-      const formattedJokes = jokes.map(joke =>
-        joke.id === id ? { ...joke, favorite: !joke.favorite } : joke,
-      );
+      const formattedJokes = jokes.map(joke => {
+        if (joke.id === id) {
+          const toggledFavoriteJoke = { ...joke, favorite: !joke.favorite };
+
+          if (toggledFavoriteJoke.favorite) {
+            addFavoriteJoke(toggledFavoriteJoke);
+          } else {
+            removeFavoriteJoke(id);
+          }
+
+          return toggledFavoriteJoke;
+        }
+
+        return joke;
+      });
 
       setJokes(formattedJokes);
     },
-    [jokes],
+    [jokes, addFavoriteJoke, removeFavoriteJoke],
+  );
+
+  const jokesWithFavoriteSetted: JokeItem[] = useMemo(
+    () =>
+      jokes.map((data: JokeItem) => {
+        if (favoriteJokes.some(joke => joke.joke === data.joke)) {
+          return { ...data, favorite: true };
+        }
+
+        return { ...data, favorite: false };
+      }),
+    [jokes, favoriteJokes],
   );
 
   const renderRow = useCallback(
     ({ index, style }) => {
-      const joke = jokes[index];
+      const joke = jokesWithFavoriteSetted[index];
 
       return (
         <li key={joke.id} style={style} className={classes.jokesListItem}>
@@ -312,7 +326,7 @@ const Dashboard: React.FC = () => {
               <IconButton
                 component="span"
                 size="small"
-                onClick={() => handleJokeFavorite(joke.id)}
+                onClick={() => handleToggleJokeFavorite(joke.id)}
                 title="Favorite"
               >
                 {joke.favorite ? (
@@ -326,7 +340,7 @@ const Dashboard: React.FC = () => {
         </li>
       );
     },
-    [jokes, classes, handleJokeFavorite],
+    [jokesWithFavoriteSetted, classes, handleToggleJokeFavorite],
   );
 
   const calculateItemSize = useCallback(
