@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
+import { Skeleton } from '@material-ui/lab';
 import {
   Box,
   Card,
@@ -21,7 +24,6 @@ import {
   DoneRounded,
   Star,
 } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
 
 import api from '../../services/api';
 
@@ -53,8 +55,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       padding: theme.spacing(0, 9),
+      display: 'flex',
+      flexDirection: 'column',
     },
     filterContainer: {
+      width: '100%',
       maxWidth: 730,
       height: 160,
       margin: '0 auto',
@@ -125,19 +130,24 @@ const useStyles = makeStyles((theme: Theme) =>
       marginTop: 15,
       marginBottom: 15,
     },
-    jokesContainer: {
+    mainContainer: {
+      flex: 1,
       padding: theme.spacing(4, 0),
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
     },
-    jokesGridTitle: {
+    jokesListTitle: {
       color: theme.palette.secondary.dark,
+      marginBottom: theme.spacing(4),
     },
-    jokesGrid: {
+    jokesListContainer: {
+      flex: 1,
+      overflow: 'auto',
+    },
+    jokesListItem: {
       listStyle: 'none',
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
-      gridGap: theme.spacing(3),
-      margin: theme.spacing(4, 0),
-      padding: 0,
+      padding: theme.spacing(0, 3, 2),
     },
     jokesCard: {
       position: 'relative',
@@ -150,8 +160,13 @@ const useStyles = makeStyles((theme: Theme) =>
       flex: 1,
       textAlign: 'justify',
       padding: theme.spacing(3),
+      display: 'flex',
+      alignItems: 'center',
+      '& > h6': {
+        flex: 1,
+      },
     },
-    jokesCardIcon: {
+    jokesCardIcons: {
       position: 'absolute',
       width: 30,
       top: 0,
@@ -281,6 +296,48 @@ const Dashboard: React.FC = () => {
     [jokes],
   );
 
+  const renderRow = useCallback(
+    ({ index, style }) => {
+      const joke = jokes[index];
+
+      return (
+        <li key={joke.id} style={style} className={classes.jokesListItem}>
+          <Card elevation={3} className={classes.jokesCard}>
+            <CardContent className={classes.jokesCardContent}>
+              <Typography component="strong" variant="h6">
+                {joke.joke}
+              </Typography>
+            </CardContent>
+            <section className={classes.jokesCardIcons}>
+              <IconButton
+                component="span"
+                size="small"
+                onClick={() => handleJokeFavorite(joke.id)}
+                title="Favorite"
+              >
+                {joke.favorite ? (
+                  <Star className={classes.iconStarFilled} fontSize="default" />
+                ) : (
+                  <Star className={classes.iconStarBorder} fontSize="default" />
+                )}
+              </IconButton>
+            </section>
+          </Card>
+        </li>
+      );
+    },
+    [jokes, classes, handleJokeFavorite],
+  );
+
+  const calculateItemSize = useCallback(
+    (index: number) => {
+      const size = jokes[index].joke.length;
+
+      return size > 120 ? size : 120;
+    },
+    [jokes],
+  );
+
   return (
     <Container className={classes.root}>
       <Box className={classes.filterContainer}>
@@ -379,62 +436,50 @@ const Dashboard: React.FC = () => {
         </Box>
       </Box>
 
-      <Box className={classes.jokesContainer}>
+      <Box className={classes.mainContainer} component="main">
         <Typography
           component="h1"
           variant="h4"
-          className={classes.jokesGridTitle}
+          className={classes.jokesListTitle}
         >
           Jokes
         </Typography>
-        <ul className={classes.jokesGrid}>
-          {!isLoading &&
-            jokes.map(joke => (
-              <li key={joke.id}>
+
+        <Box className={classes.jokesListContainer}>
+          {!isLoading ? (
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  itemCount={jokes.length}
+                  itemSize={calculateItemSize}
+                  width={width}
+                  height={height}
+                  overscanCount={2}
+                >
+                  {renderRow}
+                </List>
+              )}
+            </AutoSizer>
+          ) : (
+            [0, 1, 2, 3, 4].map(numb => (
+              <li key={numb} className={classes.jokesListItem}>
                 <Card elevation={3} className={classes.jokesCard}>
                   <CardContent className={classes.jokesCardContent}>
-                    <Typography component="strong" variant="h6">
-                      {joke.joke}
+                    <Typography variant="h6">
+                      <Skeleton variant="text" width="100%" animation="wave" />
+                      <Skeleton variant="text" width="40%" animation="wave" />
                     </Typography>
                   </CardContent>
-                  <section className={classes.jokesCardIcon}>
-                    <IconButton
-                      component="span"
-                      size="small"
-                      onClick={() => handleJokeFavorite(joke.id)}
-                      title="Favorite"
-                    >
-                      {joke.favorite ? (
-                        <Star
-                          className={classes.iconStarFilled}
-                          fontSize="default"
-                        />
-                      ) : (
-                        <Star
-                          className={classes.iconStarBorder}
-                          fontSize="default"
-                        />
-                      )}
+                  <section className={classes.jokesCardIcons}>
+                    <IconButton component="span" size="small">
+                      <Skeleton width={15} animation="wave" />
                     </IconButton>
                   </section>
                 </Card>
               </li>
-            ))}
-
-          {isLoading &&
-            [0, 1, 2, 3].map(numb => (
-              <Card elevation={3} key={numb}>
-                <CardContent>
-                  <Typography variant="h6">
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="100%" animation="wave" />
-                    <Skeleton width="40%" animation="wave" />
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
-        </ul>
+            ))
+          )}
+        </Box>
       </Box>
     </Container>
   );
