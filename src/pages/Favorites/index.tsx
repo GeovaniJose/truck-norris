@@ -20,7 +20,6 @@ import {
   DoneRounded,
   Star,
 } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
 
 import { useFavorite } from '../../hooks/favorite';
 
@@ -99,6 +98,12 @@ const useStyles = makeStyles((theme: Theme) =>
     jokesGridTitle: {
       color: theme.palette.secondary.dark,
     },
+    jokesEmpty: {
+      textAlign: 'center',
+      margin: theme.spacing(4, 0),
+      color: theme.palette.primary.light,
+      opacity: 0.5,
+    },
     jokesGrid: {
       listStyle: 'none',
       display: 'grid',
@@ -146,14 +151,16 @@ const Favorites: React.FC = () => {
 
   const [jokes, setJokes] = useState<JokeItem[]>([]);
   const [showFilter, setShowFilter] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [checkboxOptions, setCheckboxOptions] = useState<CheckboxOptionsData>({
     nerdy: false,
     explicit: false,
   });
 
   useEffect(() => {
+    setIsLoading(true);
     setJokes(favoriteJokes);
+    setIsLoading(false);
   }, [favoriteJokes]);
 
   const handleShowFilter = useCallback(() => {
@@ -323,27 +330,18 @@ const Favorites: React.FC = () => {
                 </Card>
               </li>
             ))}
-
-          {isLoading &&
-            [0, 1, 2, 3].map(numb => (
-              <li key={numb}>
-                <Card elevation={3} className={classes.jokesCard}>
-                  <CardContent className={classes.jokesCardContent}>
-                    <Typography variant="h6">
-                      <Skeleton width="100%" animation="wave" />
-                      <Skeleton width="100%" animation="wave" />
-                      <Skeleton width="40%" animation="wave" />
-                    </Typography>
-                  </CardContent>
-                  <section className={classes.jokesCardIcons}>
-                    <IconButton component="span" size="small">
-                      <Skeleton width={15} animation="wave" />
-                    </IconButton>
-                  </section>
-                </Card>
-              </li>
-            ))}
         </ul>
+
+        {!isLoading && jokes.length === 0 && (
+          <Box className={classes.jokesEmpty}>
+            <Typography component="p" variant="h4">
+              You haven&apos;t favorited anything yet.
+            </Typography>
+            <Typography component="span" variant="h5">
+              Start adding jokes to favorites
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Container>
   );
