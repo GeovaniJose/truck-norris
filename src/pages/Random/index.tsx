@@ -55,6 +55,9 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       padding: theme.spacing(0, 9),
+      [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(0, 2),
+      },
     },
     filterContainer: {
       maxWidth: 730,
@@ -140,6 +143,9 @@ const useStyles = makeStyles((theme: Theme) =>
       gridGap: theme.spacing(3),
       margin: theme.spacing(4, 0),
       padding: 0,
+      [theme.breakpoints.down('sm')]: {
+        gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+      },
     },
     jokesCard: {
       position: 'relative',
@@ -350,7 +356,7 @@ const Random: React.FC = () => {
             </FormControl>
 
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">Personalized</FormLabel>
+              <FormLabel component="legend">Personalize</FormLabel>
               <TextField
                 name="firstName"
                 label="First Name"
@@ -370,7 +376,7 @@ const Random: React.FC = () => {
             </FormControl>
 
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">Randomized</FormLabel>
+              <FormLabel component="legend">Randomize</FormLabel>
               <TextField
                 name="quantity"
                 label="Quantity"

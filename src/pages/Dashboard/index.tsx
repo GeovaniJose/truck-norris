@@ -58,6 +58,9 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(0, 9),
       display: 'flex',
       flexDirection: 'column',
+      [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(0, 2),
+      },
     },
     filterContainer: {
       width: '100%',
@@ -149,6 +152,9 @@ const useStyles = makeStyles((theme: Theme) =>
     jokesListItem: {
       listStyle: 'none',
       padding: theme.spacing(0, 3, 2),
+      [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(0, 0, 2),
+      },
     },
     jokesCard: {
       position: 'relative',
@@ -388,7 +394,7 @@ const Dashboard: React.FC = () => {
             </FormControl>
 
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">Personalized</FormLabel>
+              <FormLabel component="legend">Personalize</FormLabel>
               <TextField
                 name="firstName"
                 label="First Name"
