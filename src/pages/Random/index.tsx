@@ -279,9 +279,21 @@ const Random: React.FC = () => {
       });
   }, [checkboxOptions, textFieldsValue]);
 
+  const jokesWithFavoriteSetted: JokeItem[] = useMemo(
+    () =>
+      jokes.map((data: JokeItem) => {
+        if (favoriteJokes.some(joke => joke.joke === data.joke)) {
+          return { ...data, favorite: true };
+        }
+
+        return { ...data, favorite: false };
+      }),
+    [jokes, favoriteJokes],
+  );
+
   const handleToggleJokeFavorite = useCallback(
     (id: number) => {
-      const formattedJokes = jokes.map(joke => {
+      const formattedJokes = jokesWithFavoriteSetted.map(joke => {
         if (joke.id === id) {
           const toggledFavoriteJoke = { ...joke, favorite: !joke.favorite };
 
@@ -299,19 +311,7 @@ const Random: React.FC = () => {
 
       setJokes(formattedJokes);
     },
-    [jokes, addFavoriteJoke, removeFavoriteJoke],
-  );
-
-  const jokesWithFavoriteSetted: JokeItem[] = useMemo(
-    () =>
-      jokes.map((data: JokeItem) => {
-        if (favoriteJokes.some(joke => joke.joke === data.joke)) {
-          return { ...data, favorite: true };
-        }
-
-        return { ...data, favorite: false };
-      }),
-    [jokes, favoriteJokes],
+    [jokesWithFavoriteSetted, addFavoriteJoke, removeFavoriteJoke],
   );
 
   return (
