@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
 import {
   Box,
@@ -75,6 +76,12 @@ const Navbar: React.FC = () => {
 
   return (
     <>
+      <Helmet defaultTitle="Truck Norris">
+        {pathname === '/' && <title>Dashboard | Truck Norris</title>}
+        {pathname === '/random' && <title>Random | Truck Norris</title>}
+        {pathname === '/favorites' && <title>Favorites | Truck Norris</title>}
+      </Helmet>
+
       <Hidden xsDown implementation="css">
         <nav className={classes.root}>
           <Drawer

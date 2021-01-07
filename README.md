@@ -48,6 +48,7 @@ $ yarn start
 - ContextAPI
 - react-window
 - react-virtualized-auto-sizer
+- react-helmet
 - Responsive layout
 
 ## License :page_facing_up:

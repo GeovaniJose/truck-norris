@@ -16,6 +16,7 @@
     "axios": "^0.21.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-virtualized-auto-sizer": "^1.0.3",
@@ -42,6 +43,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-helmet": "^6.1.0",
     "@types/react-router-dom": "^5.1.6",
     "@types/react-virtualized-auto-sizer": "^1.0.0",
     "@types/react-window": "^1.8.2",
