@@ -176,6 +176,7 @@ const Navbar: React.FC = () => {
               key="Jokes"
               button
               component={RouterLink}
+              onClick={() => setDrawerOpen(false)}
               to="/"
               selected={pathname === '/'}
             >
@@ -189,6 +190,7 @@ const Navbar: React.FC = () => {
               key="Random"
               button
               component={RouterLink}
+              onClick={() => setDrawerOpen(false)}
               to="/random"
               selected={pathname === '/random'}
             >
@@ -202,6 +204,7 @@ const Navbar: React.FC = () => {
               key="Favorites"
               button
               component={RouterLink}
+              onClick={() => setDrawerOpen(false)}
               to="/favorites"
               selected={pathname === '/favorites'}
             >
