@@ -9,7 +9,7 @@
 
 <div align="center">
   <a href="https://truck-norris.geovani.dev.br">
-    <img src="./src/assets/snapshot-device.png.png" alt="#truck-norris" />
+    <img src="./src/assets/snapshot-device.png" alt="#truck-norris" />
   </a>
 </div>
 
