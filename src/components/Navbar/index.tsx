@@ -81,7 +81,7 @@ const Navbar: React.FC = () => {
       setDrawerOpen(true);
       setTimeout(() => {
         setDrawerOpen(false);
-      }, 500);
+      }, 1500);
     }
   }, [breakpoints]);
 
