@@ -61,20 +61,32 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     filterContainer: {
       maxWidth: 730,
-      height: 160,
+      minHeight: 160,
       margin: '0 auto',
       display: 'flex',
       justifyContent: 'flex-end',
+      [theme.breakpoints.down('sm')]: {
+        minHeight: 0,
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+      },
     },
     filter: {
       display: 'flex',
       justifyContent: 'space-evenly',
+      flexWrap: 'wrap',
       borderBottomLeftRadius: 20,
       background: theme.palette.primary.main,
+      [theme.breakpoints.down('sm')]: {
+        justifyContent: 'flex-start',
+      },
     },
     formControl: {
       marginTop: theme.spacing(2),
       color: theme.palette.background.default,
+      [theme.breakpoints.down('sm')]: {
+        margin: theme.spacing(2, 0),
+      },
       '& > .MuiFormLabel-root': {
         color: theme.palette.background.default,
         '&.Mui-focused': {
@@ -112,6 +124,11 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1),
       borderBottomRightRadius: 20,
       background: theme.palette.primary.main,
+      [theme.breakpoints.down('sm')]: {
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        borderBottomLeftRadius: 20,
+      },
     },
     icon: {
       fontSize: 30,
@@ -129,6 +146,9 @@ const useStyles = makeStyles((theme: Theme) =>
       color: theme.palette.success.main,
       marginTop: 15,
       marginBottom: 15,
+      [theme.breakpoints.down('sm')]: {
+        margin: 15,
+      },
     },
     mainContainer: {
       padding: theme.spacing(4, 0),

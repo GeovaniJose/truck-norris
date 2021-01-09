@@ -45,10 +45,13 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     filterContainer: {
       maxWidth: 730,
-      height: 160,
+      minHeight: 160,
       margin: '0 auto',
       display: 'flex',
       justifyContent: 'flex-end',
+      [theme.breakpoints.down('sm')]: {
+        minHeight: 0,
+      },
     },
     filter: {
       display: 'flex',
