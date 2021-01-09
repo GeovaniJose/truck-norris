@@ -17,6 +17,7 @@ import {
   IconButton,
   TextField,
   Typography,
+  useTheme,
 } from '@material-ui/core';
 import {
   FilterListRounded,
@@ -215,6 +216,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const Dashboard: React.FC = () => {
   const classes = useStyles();
+  const { breakpoints } = useTheme();
   const { favoriteJokes, addFavoriteJoke, removeFavoriteJoke } = useFavorite();
 
   const [showFilter, setShowFilter] = useState(false);
@@ -371,11 +373,16 @@ const Dashboard: React.FC = () => {
 
   const calculateItemSize = useCallback(
     (index: number) => {
+      const minItemSize = 120;
       const size = jokes[index].joke.length;
 
-      return size > 120 ? size : 120;
+      if (window.innerWidth < breakpoints.values.sm) {
+        return size * 2;
+      }
+
+      return size > minItemSize ? size : minItemSize;
     },
-    [jokes],
+    [jokes, breakpoints],
   );
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
@@ -12,6 +12,7 @@ import {
   ListItemText,
   Typography,
   Hidden,
+  useTheme,
 } from '@material-ui/core';
 import { Dashboard, Repeat, Star } from '@material-ui/icons';
 
@@ -71,8 +72,18 @@ const useStyles = makeStyles((theme: Theme) =>
 const Navbar: React.FC = () => {
   const classes = useStyles();
   const { pathname } = useLocation();
+  const { breakpoints } = useTheme();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (window.innerWidth < breakpoints.values.sm) {
+      setDrawerOpen(true);
+      setTimeout(() => {
+        setDrawerOpen(false);
+      }, 500);
+    }
+  }, [breakpoints]);
 
   return (
     <>
